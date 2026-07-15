@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verification Time vs Number of Verification Requests</title>
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  .figure-wrapper {
+    background: #ffffff;
+    padding: 32px 40px 40px 40px;
+    width: 860px;
+  }
+
+  .fig-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: #000;
+    letter-spacing: 0.01em;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    font-family: 'Times New Roman', Times, serif;
+  }
+
+  .chart-area {
+    position: relative;
+    width: 100%;
+  }
+
+  svg {
+    display: block;
+    background: #ffffff;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="figure-wrapper">
+
+  <div class="fig-title">
+    Fig. 1. Verification Time vs Number of Verification Requests
+  </div>
+
+  <div class="chart-area">
+    <svg id="chart" viewBox="0 0 780 480" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+</div>
+
+<script>
+
+const svg = document.getElementById('chart');
+const NS = 'http://www.w3.org/2000/svg';
+
+// Layout
+const margin = { top: 24, right: 160, bottom: 68, left: 80 };
+const W = 780, H = 480;
+const plotW = W - margin.left - margin.right;
+const plotH = H - margin.top - margin.bottom;
+
+// Data
+const traditional = [
+  {x: 10,  y: 4},
+  {x: 50,  y: 20},
+  {x: 100, y: 41},
+  {x: 200, y: 82},
+  {x: 500, y: 205},
+];
+
+const zkp = [
+  {x: 10,  y: 0.2},
+  {x: 50,  y: 1},
+  {x: 100, y: 2},
+  {x: 200, y: 4},
+  {x: 500, y: 10},
+];
+
+// Scales
+const xMin = 0, xMax = 500;
+const yMin = 0, yMax = 220;
+
+const xTicks = [0, 100, 200, 300, 400, 500];
+const yTicks = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220];
+
+function scaleX(v) {
+  return margin.left + (v - xMin) / (xMax - xMin) * plotW;
+}
+
+function scaleY(v) {
+  return margin.top + plotH - (v - yMin) / (yMax - yMin) * plotH;
+}
+
+function el(tag, attrs={}, parent=svg) {
+  const e = document.createElementNS(NS, tag);
+
+  for (const [k, v] of Object.entries(attrs)) {
+    e.setAttribute(k, v);
+  }
+
+  parent.appendChild(e);
+  return e;
+}
+
+// Background
+el('rect', {
+  x:0,
+  y:0,
+  width:W,
+  height:H,
+  fill:'#ffffff'
+});
+
+// Clip Path
+const defs = el('defs');
+
+const clip = el('clipPath', {
+  id:'plot-clip'
+}, defs);
+
+el('rect', {
+  x: margin.left,
+  y: margin.top,
+  width: plotW,
+  height: plotH
+}, clip);
+
+// Plot Background
+el('rect', {
+  x: margin.left,
+  y: margin.top,
+  width: plotW,
+  height: plotH,
+  fill: '#ffffff',
+  stroke: '#000000',
+  'stroke-width': '2'
+});
+
+// Gridlines
+for (const t of xTicks) {
+
+  if (t === xMin) continue;
+
+  const x = scaleX(t);
+
+  el('line', {
+    x1: x,
+    y1: margin.top,
+    x2: x,
+    y2: margin.top + plotH,
+    stroke: '#9a9a9a',
+    'stroke-width': '1.1',
+    'stroke-dasharray': '3,3'
+  });
+}
+
+for (const t of yTicks) {
+
+  if (t === yMin) continue;
+
+  const y = scaleY(t);
+
+  el('line', {
+    x1: margin.left,
+    y1: y,
+    x2: margin.left + plotW,
+    y2: y,
+    stroke: '#9a9a9a',
+    'stroke-width': '1.1',
+    'stroke-dasharray': '3,3'
+  });
+}
+
+// X Axis
+el('line', {
+  x1: margin.left,
+  y1: margin.top + plotH,
+  x2: margin.left + plotW,
+  y2: margin.top + plotH,
+  stroke: '#000',
+  'stroke-width': '2.5'
+});
+
+// Y Axis
+el('line', {
+  x1: margin.left,
+  y1: margin.top,
+  x2: margin.left,
+  y2: margin.top + plotH,
+  stroke: '#000',
+  'stroke-width': '2.5'
+});
+
+// X Ticks
+for (const t of xTicks) {
+
+  const x = scaleX(t);
+  const y = margin.top + plotH;
+
+  el('line', {
+    x1: x,
+    y1: y,
+    x2: x,
+    y2: y+6,
+    stroke:'#000',
+    'stroke-width':'1.4'
+  });
+
+  el('text', {
+    x,
+    y: y+20,
+    'text-anchor':'middle',
+    'font-size':'13',
+    'font-family':'Times New Roman, Times, serif',
+    'font-weight':'bold',
+    fill:'#000'
+  }).textContent = t;
+}
+
+// Y Ticks
+for (const t of yTicks) {
+
+  const x = margin.left;
+  const y = scaleY(t);
+
+  el('line', {
+    x1: x-6,
+    y1: y,
+    x2: x,
+    y2: y,
+    stroke:'#000',
+    'stroke-width':'1.4'
+  });
+
+  el('text', {
+    x: x-12,
+    y: y+4,
+    'text-anchor':'end',
+    'font-size':'13',
+    'font-family':'Times New Roman, Times, serif',
+    'font-weight':'bold',
+    fill:'#000'
+  }).textContent = t;
+}
+
+// X Label
+el('text', {
+  x: margin.left + plotW/2,
+  y: H - 10,
+  'text-anchor':'middle',
+  'font-size':'15',
+  'font-family':'Times New Roman, Times, serif',
+  'font-weight':'bold',
+  fill:'#000'
+}).textContent = 'Number of Verification Requests';
+
+// Y Label
+const yLabel = el('text', {
+  x: 0,
+  y: 0,
+  'text-anchor':'middle',
+  'font-size':'15',
+  'font-family':'Times New Roman, Times, serif',
+  'font-weight':'bold',
+  fill:'#000',
+  transform: `translate(16, ${margin.top + plotH/2}) rotate(-90)`
+});
+
+yLabel.textContent = 'Total Verification Time (seconds)';
+
+// Build Polyline
+function pointsStr(data) {
+  return data.map(d => `${scaleX(d.x)},${scaleY(d.y)}`).join(' ');
+}
+
+// Traditional Line
+el('polyline', {
+  points: pointsStr(traditional),
+  fill:'none',
+  stroke:'#003b99',
+  'stroke-width':'3.5',
+  'stroke-linejoin':'round',
+  'stroke-linecap':'round',
+  'clip-path':'url(#plot-clip)'
+});
+
+// ZKP Line
+el('polyline', {
+  points: pointsStr(zkp),
+  fill:'none',
+  stroke:'#006d2c',
+  'stroke-width':'3.5',
+  'stroke-linejoin':'round',
+  'stroke-linecap':'round',
+  'clip-path':'url(#plot-clip)'
+});
+
+// Markers
+function drawMarkers(data, color) {
+
+  for (const d of data) {
+
+    el('circle', {
+      cx: scaleX(d.x),
+      cy: scaleY(d.y),
+      r: '5.5',
+      fill: '#ffffff',
+      stroke: color,
+      'stroke-width': '3',
+      'clip-path': 'url(#plot-clip)'
+    });
+  }
+}
+
+drawMarkers(traditional, '#003b99');
+drawMarkers(zkp, '#006d2c');
+
+// Legend
+const lx = margin.left + plotW + 12;
+const ly = margin.top + 16;
+const lw = 145;
+const lh = 72;
+
+el('rect', {
+  x: lx,
+  y: ly,
+  width: lw,
+  height: lh,
+  fill:'#ffffff',
+  stroke:'#000000',
+  'stroke-width':'1.4',
+  rx:'2',
+  ry:'2'
+});
+
+// Traditional Legend
+el('line', {
+  x1: lx+12,
+  y1: ly+24,
+  x2: lx+46,
+  y2: ly+24,
+  stroke:'#003b99',
+  'stroke-width':'3'
+});
+
+el('circle', {
+  cx: lx+29,
+  cy: ly+24,
+  r:'5',
+  fill:'#ffffff',
+  stroke:'#003b99',
+  'stroke-width':'2.5'
+});
+
+el('text', {
+  x: lx+56,
+  y: ly+29,
+  'font-size':'12.5',
+  'font-family':'Times New Roman, Times, serif',
+  'font-weight':'bold',
+  fill:'#000'
+}).textContent = 'Traditional';
+
+// ZKP Legend
+el('line', {
+  x1: lx+12,
+  y1: ly+52,
+  x2: lx+46,
+  y2: ly+52,
+  stroke:'#006d2c',
+  'stroke-width':'3'
+});
+
+el('circle', {
+  cx: lx+29,
+  cy: ly+52,
+  r:'5',
+  fill:'#ffffff',
+  stroke:'#006d2c',
+  'stroke-width':'2.5'
+});
+
+el('text', {
+  x: lx+56,
+  y: ly+57,
+  'font-size':'12.5',
+  'font-family':'Times New Roman, Times, serif',
+  'font-weight':'bold',
+  fill:'#000'
+}).textContent = 'ZKP-Based';
+
+</script>
+
+</body>
+</html>

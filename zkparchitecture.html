@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZKP Pipeline Diagram – IEEE Publication</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,300;0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --col1: #2d6a4f;
+    --col2: #e07b39;
+    --col3: #3a7dbf;
+    --col4: #6b4fa0;
+    --col5: #c24b8a;
+    --col6: #7b5ea7;
+    --hdr-bg: #2c3e6b;
+    --hdr-light: #4a5a8c;
+    --bg: #f8f7f4;
+    --border: #c8c4bc;
+    --text: #1a1a1a;
+    --text-sm: #3a3a3a;
+    --file-bg: #e8e4de;
+    --authentic: #2d6a4f;
+    --tampered: #c0392b;
+    --arrow: #555;
+    --shadow: 0 1px 3px rgba(0,0,0,0.12);
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-serif: 'Source Serif 4', serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #e8e6e0;
+    font-family: var(--font-body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px;
+  }
+
+  .paper-wrapper {
+    background: #fff;
+    border: 1px solid #aaa;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    padding: 32px 28px 28px;
+    max-width: 1300px;
+    width: 100%;
+  }
+
+  /* ── Figure caption ── */
+  .fig-title {
+    text-align: center;
+    font-family: var(--font-serif);
+    font-size: 13.5px;
+    font-weight: 400;
+    color: #111;
+    margin-bottom: 20px;
+    letter-spacing: 0.01em;
+    line-height: 1.5;
+  }
+  .fig-title strong { font-weight: 700; }
+
+  /* ── Grid ── */
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
+  /* ── Column ── */
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── Column header ── */
+  .col-hdr {
+    border-radius: 5px 5px 0 0;
+    padding: 7px 6px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.03em;
+    line-height: 1.3;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .col-body {
+    border: 1.5px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    padding: 10px 8px 12px;
+    background: var(--bg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Colour scheme per column */
+  .c1 .col-hdr { background: var(--col1); }
+  .c2 .col-hdr { background: var(--col2); }
+  .c3 .col-hdr { background: var(--col3); }
+  .c4 .col-hdr { background: var(--col4); }
+  .c5 .col-hdr { background: var(--col5); }
+  .c6 .col-hdr { background: var(--col6); }
+
+  /* ── Box ── */
+  .box {
+    width: 100%;
+    border-radius: 5px;
+    padding: 7px 8px;
+    text-align: center;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .box .icon {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 3px;
+    line-height: 1;
+  }
+  .box .label {
+    font-size: 10px;
+    font-weight: 400;
+    color: #555;
+    font-style: italic;
+  }
+
+  /* Colour tints */
+  .b-green  { background: #c8ead8; border: 1.5px solid #7bbfa0; }
+  .b-orange { background: #fce5cc; border: 1.5px solid #e0a06a; }
+  .b-blue   { background: #cfe0f5; border: 1.5px solid #7aafdc; }
+  .b-purple { background: #e0d4f5; border: 1.5px solid #a88cda; }
+  .b-pink   { background: #f5d0e8; border: 1.5px solid #d98cbf; }
+  .b-violet { background: #ddd0f0; border: 1.5px solid #a084d0; }
+  .b-dark   { background: #3a3a4a; border: 1.5px solid #222; color: #eee; }
+  .b-file   { background: var(--file-bg); border: 1.5px dashed #999; }
+
+  /* ── Arrow (vertical) ── */
+  .arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3px 0;
+    color: var(--arrow);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .arrow-dash {
+    border-left: 1.5px dashed #888;
+    height: 18px;
+    margin: 0 auto;
+    width: 0;
+  }
+
+  /* ── Bullet list inside box ── */
+  .box ul {
+    list-style: disc;
+    padding-left: 14px;
+    text-align: left;
+    margin-top: 4px;
+  }
+  .box ul li {
+    font-size: 9.5px;
+    line-height: 1.4;
+    color: #333;
+    margin-bottom: 1px;
+  }
+
+  /* ── File node ── */
+  .file-node {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: auto;
+    padding-top: 6px;
+  }
+  .file-node .fn-icon { font-size: 22px; }
+  .file-node .fn-name {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 500;
+    color: #222;
+    background: #fff;
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .file-node .fn-desc {
+    font-size: 9px;
+    color: #666;
+    font-style: italic;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+    align-items: center;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+  .leg-badge {
+    width: 22px; height: 22px;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .leg-auth { background: #c8ead8; border: 1.5px solid #2d6a4f; color: #2d6a4f; }
+  .leg-tamp { background: #fcdcd8; border: 1.5px solid #c0392b; color: #c0392b; }
+
+  /* ── Input rows with arrow ── */
+  .input-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 4px;
+    margin-bottom: 5px;
+  }
+  .input-arrow {
+    font-size: 11px;
+    color: #444;
+    flex-shrink: 0;
+  }
+  .input-row .box { flex: 1; }
+
+  /* spacer */
+  .spacer { flex: 1; }
+  .gap6 { height: 6px; }
+  .gap4 { height: 4px; }
+</style>
+</head>
+<body>
+<div class="paper-wrapper">
+
+  <p class="fig-title">
+    <strong>Fig. 1.</strong> End-to-end Zero-Knowledge Proof (ZKP) pipeline for privacy-preserving cross-chain attribute verification.
+    The pipeline spans six stages: (1) private input preparation, (2) ZK circuit execution, (3) witness generation,
+    (4) Groth16 proof generation, (5) public signal extraction, and (6) on-chain verification.
+  </p>
+
+  <div class="pipeline">
+
+    <!-- ═══ COL 1 ═══ -->
+    <div class="col c1">
+      <div class="col-hdr">1. Inputs to ZKP Circuit</div>
+      <div class="col-body">
+
+        <div class="input-row">
+          <span class="input-arrow">→</span>
+          <div class="box b-green">
+            <span class="icon">🌿</span>
+            Leaf Hashes
+            <div class="label">(Poseidon)</div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <span class="input-arrow">→</span>
+          <div class="box b-green">
+            <span class="icon">🌳</span>
+            Merkle Proof
+            <div class="label">(Sibling Hashes)</div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <span class="input-arrow">→</span>
+          <div class="box b-green">
+            <span class="icon">🔗</span>
+            On-chain Merkle Root
+            <div class="label">(from Polygon)</div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <span class="input-arrow">→</span>
+          <div class="box b-green">
+            <span class="icon">📍</span>
+            Attribute Index
+            <div class="label">(Position)</div>
+          </div>
+        </div>
+
+        <div class="input-row">
+          <span class="input-arrow">→</span>
+          <div class="box b-green">
+            <span class="icon">🕐</span>
+            (Optional) IPFS CID / Timestamp
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="arrow-dash"></div>
+        <div class="arrow">↓</div>
+
+        <div class="file-node">
+          <span class="fn-icon">📄</span>
+          <span class="fn-name">input.json</span>
+          <span class="fn-desc">(Private Input)</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ COL 2 ═══ -->
+    <div class="col c2">
+      <div class="col-hdr">2. ZK Circuit (Circom)</div>
+      <div class="col-body">
+
+        <div class="box b-orange">
+          <span class="icon">⟨/⟩</span>
+          Load Circuit
+          <div class="label">(.circom)</div>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-orange">
+          Recompute Leaf Hash Using Poseidon
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-orange">
+          Rebuild Merkle Path Up to Root
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-orange">
+          Compute Root Inside Circuit
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-orange" style="font-size:10px;">
+          Check Equality<br>
+          <span style="font-family:var(--font-mono);font-size:9px;">(Computed Root ==<br>On-chain Root)</span>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-orange" style="font-weight:700;">
+          Enforce Constraints
+        </div>
+
+        <div class="spacer"></div>
+        <div class="arrow-dash"></div>
+        <div class="arrow">↓</div>
+
+        <div class="file-node">
+          <span class="fn-icon">📄</span>
+          <span class="fn-name">circuit.circom</span>
+          <span class="fn-desc">(ZK Circuit)</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ COL 3 ═══ -->
+    <div class="col c3">
+      <div class="col-hdr">3. Witness Generation</div>
+      <div class="col-body">
+
+        <div class="box b-blue">
+          <span class="icon">📁</span>
+          Collect Private Inputs
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-blue">
+          <span class="icon">💻</span>
+          Witness Generator
+          <div class="label">(snarkjs)</div>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-blue">
+          <span class="icon">📋</span>
+          Generate Witness
+          <div class="label">(.wtns)</div>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-blue" style="text-align:left;padding:8px 10px;">
+          <strong style="font-size:10px;display:block;margin-bottom:4px;text-align:center;">Witness Contains:</strong>
+          <ul>
+            <li>Attribute Values</li>
+            <li>Salts</li>
+            <li>Merkle Path Siblings</li>
+            <li>(Any other private data)</li>
+          </ul>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="arrow-dash"></div>
+        <div class="arrow">↓</div>
+
+        <div class="file-node">
+          <span class="fn-icon">📄</span>
+          <span class="fn-name">witness.wtns</span>
+          <span class="fn-desc">(Witness File)</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ COL 4 ═══ -->
+    <div class="col c4">
+      <div class="col-hdr">4. Proof Generation</div>
+      <div class="col-body">
+
+        <div class="box b-dark">
+          <span class="icon">🛡️</span>
+          Prover
+          <div class="label" style="color:#ccc;">(snarkjs)</div>
+        </div>
+        <div class="arrow" style="color:#aaa;">↓</div>
+
+        <div class="box b-purple" style="font-size:10px;text-align:left;padding:8px;">
+          Use Circuit <span style="font-family:var(--font-mono);font-size:9px;">(.r1cs/.wasm)</span><br>
+          + Witness <span style="font-family:var(--font-mono);font-size:9px;">(.wtns)</span><br>
+          + Proving Key <span style="font-family:var(--font-mono);font-size:9px;">(.skey)</span>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-purple">
+          <span class="icon">📦</span>
+          Groth16 Proof Generation
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-purple">
+          <span class="icon">✅</span>
+          Proof Generated
+          <div class="label">(proof.json)</div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="arrow-dash"></div>
+        <div class="arrow">↓</div>
+
+        <div class="file-node">
+          <span class="fn-icon">📄</span>
+          <span class="fn-name">proof.json</span>
+          <span class="fn-desc">(proof.json)</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ COL 5 ═══ -->
+    <div class="col c5">
+      <div class="col-hdr">5. Public Signals (Outputs)</div>
+      <div class="col-body">
+
+        <div class="box b-pink">
+          <span class="icon">📢</span>
+          Generate Public Signals
+          <div class="label">(Visible to Verifier)</div>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-pink" style="text-align:left;padding:8px 10px;">
+          <strong style="font-size:10px;display:block;margin-bottom:4px;text-align:center;">Public Signals Include:</strong>
+          <ul>
+            <li>On-chain Merkle Root</li>
+            <li>Attribute Index</li>
+            <li>(Optional) IPFS CID / Timestamp</li>
+          </ul>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="arrow-dash"></div>
+        <div class="arrow">↓</div>
+
+        <div class="file-node">
+          <span class="fn-icon">📄</span>
+          <span class="fn-name">public.json</span>
+          <span class="fn-desc">(Public Signals File)</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ COL 6 ═══ -->
+    <div class="col c6">
+      <div class="col-hdr">6. Ready for Verification</div>
+      <div class="col-body">
+
+        <div class="box b-violet">
+          <span class="icon">🌐</span>
+          Send to Cross-Chain Verification Layer
+          <div class="label">(BNB Chain)</div>
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-violet">
+          <span class="icon">🖥️</span>
+          Send to Verifier Smart Contract
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-violet" style="text-align:left;padding:8px 10px;font-size:10px;">
+          <strong style="display:block;margin-bottom:3px;text-align:center;">Verifier Uses:</strong>
+          Proof + Public Signals<br>+ Verification Key
+        </div>
+        <div class="arrow">↓</div>
+
+        <div class="box b-green" style="font-weight:700;">
+          ✅ Verification Result:<br>
+          <span style="font-size:11px;">Authentic / Tampered</span>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="arrow-dash"></div>
+        <div class="arrow">↓</div>
+
+        <div class="file-node">
+          <span class="fn-icon">🔑</span>
+          <span class="fn-name">verification_key.json</span>
+          <span class="fn-desc">(vk)</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /pipeline -->
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="leg-item">
+      <div class="leg-badge leg-auth">✓</div>
+      <span>Authentic</span>
+    </div>
+    <div class="leg-item">
+      <div class="leg-badge leg-tamp">✗</div>
+      <span>Tampered</span>
+    </div>
+  </div>
+
+</div><!-- /paper-wrapper -->
+</body>
+</html>
